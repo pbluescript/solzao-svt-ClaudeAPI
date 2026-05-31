@@ -23,14 +23,11 @@ export default async function handler(req, res) {
   try {
     const response = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
-      // ↑ Modèle rapide et économique (~0.01€/génération).
-      // Pour plus de qualité : "claude-sonnet-4-6"
       max_tokens,
       messages,
     });
 
     return res.status(200).json(response);
-    // Le frontend lit : data.content.map(b => b.text || '').join('')
 
   } catch (err) {
     console.error("Erreur API Anthropic :", err);
