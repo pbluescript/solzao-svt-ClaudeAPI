@@ -298,7 +298,6 @@
     }
     .fiche-section-content li { font-size: 14px; line-height: 1.6; color: #1A2010; }
 
-    /* Tableau des séances */
     .seances-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 
     .seances-table th {
@@ -323,7 +322,6 @@
     .seances-table tr:nth-child(even) td { background: #F8FCF8; }
     .seance-num { font-weight: 700; color: #1A3A1A; white-space: nowrap; }
 
-    /* Phases de séance */
     .phases-list { display: flex; flex-direction: column; gap: 0; }
 
     .phase-item {
@@ -338,14 +336,13 @@
       font-size: 10px; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.08em;
       color: #4A9A4A;
-      min-width: 140px;
+      min-width: 160px;
       flex-shrink: 0;
       padding-top: 2px;
     }
 
     .phase-content { font-size: 13.5px; color: #1A2010; line-height: 1.6; }
 
-    /* Notions / capacités */
     .pills-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
 
     .pill {
@@ -364,7 +361,6 @@
       border-color: #E8D88A;
     }
 
-    /* Zone de modification */
     .modif-zone {
       margin-top: 24px;
       background: #FAFDF8;
@@ -477,7 +473,6 @@
 
 <div class="page-wrapper">
 
-  <!-- ── FORMULAIRE ── -->
   <div class="form-col">
     <div class="form-header">
       <div class="module-badge">🔬 SVT uniquement</div>
@@ -487,7 +482,6 @@
 
     <div class="form-body">
 
-      <!-- Niveau -->
       <div class="field-group">
         <label class="field-label" for="niveau">Niveau <span class="field-required">*</span></label>
         <select id="niveau" onchange="mettreAJourThemes()">
@@ -506,7 +500,6 @@
         </select>
       </div>
 
-      <!-- Nb séances + type de séance -->
       <div class="grid-2">
         <div class="field-group">
           <label class="field-label" for="nb-seances">Nb de séances <span class="field-required">*</span></label>
@@ -532,20 +525,17 @@
         </div>
       </div>
 
-      <!-- Thème -->
       <div class="field-group">
         <label class="field-label" for="theme">Thème ou titre de la séquence <span class="field-required">*</span></label>
         <input type="text" id="theme" placeholder="ex. La cellule, L'évolution, La digestion, La tectonique…">
         <div id="suggestions-themes" style="display:none; margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;"></div>
       </div>
 
-      <!-- Précisions -->
       <div class="field-group">
         <label class="field-label" for="objectifs">Précisions (optionnel)</label>
         <textarea id="objectifs" placeholder="ex. Classe de 5ème très hétérogène, insister sur la démarche hypothético-déductive, pas de microscope disponible…"></textarea>
       </div>
 
-      <!-- Options pédagogiques -->
       <div class="field-group">
         <label class="field-label">Options</label>
         <div class="options-group">
@@ -583,7 +573,6 @@
     </div>
   </div>
 
-  <!-- ── RÉSULTAT ── -->
   <div class="result-col">
     <div class="result-toolbar">
       <span class="result-toolbar-title" id="toolbar-title">Résultat de la génération</span>
@@ -605,7 +594,7 @@
           <span class="modif-counter" id="modif-counter">10 modifications restantes</span>
         </div>
         <textarea class="modif-input" id="modif-input"
-          placeholder="ex. Rends la séance 2 plus axée TP · Ajoute une séance d'introduction par une situation-problème · Simplifie pour une classe de SEGPA · Remplace l'expérience par une simulation numérique…"></textarea>
+          placeholder="ex. Rends la séance 2 plus axée TP · Ajoute une séance d'introduction par une situation-problème · Simplifie pour une classe de SEGPA…"></textarea>
         <div class="modif-actions">
           <button class="btn-modif" id="btn-modif" onclick="modifierSequence()">
             <div class="spinner"></div>
@@ -624,11 +613,10 @@
 
 <script>
 
-  // ── Suggestions de thèmes par niveau ──
   const THEMES_SVT = {
     '6ème':  ['La cellule, unité du vivant','La photosynthèse','La biodiversité','Les êtres vivants dans leur milieu','Géologie — roches et paysages'],
     '5ème':  ['La digestion','La respiration','La reproduction sexuée','Le peuplement des milieux','Géologie interne — volcans et séismes'],
-    '4ème':  ['La reproduction humaine','La transmission de la vie','Microorganismes et santé','L\'évolution des espèces','Tectonique des plaques'],
+    '4ème':  ['La reproduction humaine','La transmission de la vie','Microorganismes et santé',"L'évolution des espèces",'Tectonique des plaques'],
     '3ème':  ['Génétique et hérédité','Corps humain et santé','Réflexes et système nerveux','Évolution et classification','Responsabilité humaine en matière de santé'],
     'Seconde':['La cellule et son organisation','Génétique — ADN et mutations','La biodiversité et son évolution','Les écosystèmes','La tectonique des plaques'],
     'Première spé SVT': ['Expression du génotype','Immunologie','Physiologie animale','Écologie et évolution','Génétique des populations'],
@@ -639,12 +627,7 @@
     const niveau = document.getElementById('niveau').value;
     const container = document.getElementById('suggestions-themes');
     container.innerHTML = '';
-
-    if (!niveau || !THEMES_SVT[niveau]) {
-      container.style.display = 'none';
-      return;
-    }
-
+    if (!niveau || !THEMES_SVT[niveau]) { container.style.display = 'none'; return; }
     container.style.display = 'flex';
     THEMES_SVT[niveau].forEach(theme => {
       const chip = document.createElement('span');
@@ -655,7 +638,6 @@
     });
   }
 
-  // ── Réparation JSON ──
   function repairJSON(str) {
     let result = ''; let inString = false; let escape = false;
     for (let i = 0; i < str.length; i++) {
@@ -673,114 +655,44 @@
     return result;
   }
 
-  // ── Construction du prompt SVT ──
   function construirePrompt(niveau, nbSeances, theme, typeSeance, objectifs, opts) {
     const typeDesc = {
       'mixte':   'séances alternant cours dialogué et activités pratiques (TP légers, manipulation de docs)',
       'TP':      'séances majoritairement expérimentales (TP, dissections, observations au microscope, expériences)',
       'cours':   'séances de cours magistraux enrichis de questionnements et de schémas bilan',
       'terrain': 'séances orientées observation du terrain, sortie naturaliste, exploitation de données de terrain',
-      'doc':     'séances d\'exploitation de documents scientifiques, de graphiques, d\'articles, de données chiffrées',
+      'doc':     "séances d'exploitation de documents scientifiques, de graphiques, d'articles, de données chiffrées",
     }[typeSeance] || 'séances mixtes';
 
-    const optsTxt = [];
-    if (opts.phases)    optsTxt.push('détailler les phases de chaque séance SVT (mise en situation, recueil des représentations / hypothèses, activité / expérimentation, institutionnalisation / bilan, trace écrite)');
-    if (opts.notions)   optsTxt.push('lister les notions clés et les capacités/habiletés du programme officiel travaillées');
-    if (opts.eval)      optsTxt.push('proposer une évaluation finale (type, compétences évaluées, critères)');
-    if (opts.diff)      optsTxt.push('pistes de différenciation pour élèves en difficulté et élèves avancés');
-    if (opts.ressources) optsTxt.push('suggestions de matériel, ressources documentaires ou sites institutionnels utiles');
-
-    const optsStr = optsTxt.length > 0 ? `\n\nInclure également : ${optsTxt.join(' ; ')}.` : '';
-
-    return `Tu es un(e) professeur(e) expert(e) en SVT pour le secondaire français, parfaitement au fait des programmes officiels Éduscol et des attendus du CAPES SVT.
-
-PARAMÈTRES :
-- Niveau : ${niveau}
-- Thème / titre de la séquence : ${theme}
-- Nombre de séances : ${nbSeances}
-- Type de séances dominant : ${typeDesc}
-${objectifs ? `- Précisions de l'enseignant : ${objectifs}` : ''}${optsStr}
-
-RÈGLES CRITIQUES :
-- Réponds UNIQUEMENT avec du JSON valide, zéro texte avant ou après
-- INTERDIT : retours à la ligne littéraux dans les valeurs string (remplace par un espace)
-- Chaque valeur string = une seule ligne sans saut de ligne
-- La problématique doit être formulée comme une vraie question scientifique ouverte
-
-JSON attendu (respecte exactement cette structure) :
-{
-  "niveau": "${niveau}",
-  "nb_seances": ${nbSeances},
-  "titre": "titre clair de la séquence",
-  "sous_titre": "sous-titre court contextualisant",
-  "programme": "référence précise au programme officiel SVT (thème, sous-thème, BO)",
-  "problematique": "Question scientifique centrale de la séquence ?",
-  "notions": ["notion clé 1", "notion clé 2", "notion clé 3"],
-  "capacites": ["Extraire des informations d'un document", "Réaliser un schéma bilan", "..."],
-  "prerequis": ["prérequis 1", "prérequis 2"],
-  "seances": [
-    {
-      "num": 1,
-      "titre": "titre de la séance",
-      "duree": "1h",
-      "type": "Cours / TP / Évaluation / ...",
-      "objectif": "objectif opérationnel court",
-      "phases": {
-        "mise_en_situation": "description courte en une ligne",
-        "hypotheses": "recueil des représentations ou formulation d'hypothèses",
-        "activite": "description de l'activité principale (TP, docs, expérience...)",
-        "bilan": "institutionnalisation des savoirs, correction",
-        "trace_ecrite": "ce que les élèves retiennent / rédigent dans leur cahier"
-      }
-    }
-  ],
-  "evaluation": ${opts.eval ? '"description de l\'évaluation finale en une ligne"' : 'null'},
-  "differenciation": ${opts.diff ? '"pistes de différenciation en une ligne"' : 'null'},
-  "ressources": ${opts.ressources ? '"matériel ou ressources utiles en une ligne"' : 'null'}
-}
-
-Génère exactement ${nbSeances} séances. Réponds uniquement avec le JSON, rien d'autre.`;
+    return `Tu es un(e) professeur(e) expert(e) en SVT pour le secondaire français, parfaitement au fait des programmes officiels Éduscol et des attendus du CAPES SVT.\n\nPARAMÈTRES :\n- Niveau : ${niveau}\n- Thème / titre de la séquence : ${theme}\n- Nombre de séances : ${nbSeances}\n- Type de séances dominant : ${typeDesc}\n${objectifs ? `- Précisions de l'enseignant : ${objectifs}` : ''}\n\nRÈGLES CRITIQUES :\n- Réponds UNIQUEMENT avec du JSON valide, zéro texte avant ou après\n- INTERDIT : retours à la ligne littéraux dans les valeurs string (remplace par un espace)\n- Chaque valeur string = une seule ligne sans saut de ligne\n- La problématique doit être formulée comme une vraie question scientifique ouverte\n- La différenciation DOIT être concrète et rattachée à l'activité précise de la séance. INTERDIT : "documents simplifiés", "aide supplémentaire", "recherche complémentaire" sans précision\n- Exemple BON différenciation difficulté : "Fournir le schéma de l'axe HPG pré-rempli à légender plutôt qu'à construire"\n- Exemple BON différenciation avancé : "Analyser un article de vulgarisation sur un cas de puberté précoce"\n- Les outils numériques doivent avoir un NOM EXACT (Wooclap, Padlet, Kahoot, Genially, Quizlet, Canva, MindMeister...) et préciser dans quelle phase et pour quel usage exact\n- La trace écrite doit décrire PRÉCISÉMENT : type de document (schéma annoté / tableau / texte), contenu attendu, volume indicatif\n\nJSON attendu :\n{\n  "niveau": "${niveau}",\n  "nb_seances": ${nbSeances},\n  "titre": "titre clair de la séquence",\n  "sous_titre": "sous-titre court contextualisant",\n  "programme": "référence précise au programme officiel SVT (thème, sous-thème, BO)",\n  "problematique": "Question scientifique centrale de la séquence ?",\n  "notions": ["notion clé 1", "notion clé 2", "notion clé 3"],\n  "capacites": ["Extraire des informations d'un document", "Réaliser un schéma bilan"],\n  "prerequis": ["prérequis 1", "prérequis 2"],\n  "seances": [\n    {\n      "num": 1,\n      "titre": "titre de la séance",\n      "duree": "1h",\n      "type": "Cours dialogué / TP / Exploitation de documents / Évaluation",\n      "objectif": "objectif opérationnel précis : l'élève sera capable de...",\n      "resume": "résumé des activités en 2-3 lignes pour vue rapide",\n      "phases": {\n        "mise_en_situation": "document ou situation déclencheur précis",\n        "hypotheses": "modalité concrète de recueil des hypothèses",\n        "activite": "description précise avec matériel/documents utilisés",\n        "bilan": "modalité d'institutionnalisation",\n        "trace_ecrite": "description PRÉCISE : type + contenu + volume"\n      },\n      "differenciation": {\n        "difficulte": "adaptation concrète reliée à l'activité de cette séance",\n        "avance": "approfondissement concret relié à l'activité de cette séance"\n      },\n      "outil_numerique": ${opts.ressources ? '{"nom": "nom exact de l\'outil", "moment": "phase et moment précis", "usage": "usage précis"}' : 'null'}\n    }\n  ],\n  "evaluation": ${opts.eval ? '"description précise : type, compétences évaluées, format attendu"' : 'null'},\n  "ressources_materielles": ${opts.ressources ? '"matériel ou ressources documentaires nécessaires"' : 'null'}\n}\n\nGénère exactement ${nbSeances} séances. Réponds uniquement avec le JSON, rien d'autre.`;
   }
 
-  // ── Appel API ──
   async function appelAPI(prompt) {
     const response = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 5000
-      })
+      body: JSON.stringify({ messages: [{ role: 'user', content: prompt }], max_tokens: 5000 })
     });
-
     if (!response.ok) {
       const errData = await response.json().catch(() => ({}));
       throw new Error(errData.error || `Erreur serveur ${response.status}`);
     }
-
     const data = await response.json();
-    const rawText = data.content.map(b => b.text || '').join('');  // Format Anthropic
+    const rawText = data.content.map(b => b.text || '').join('');
     let clean = rawText.replace(/```json|```/g, '').trim();
     const jsonMatch = clean.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('Réponse inattendue — aucun JSON trouvé. Réessayez.');
     clean = repairJSON(jsonMatch[0]);
-
-    try {
-      return JSON.parse(clean);
-    } catch {
-      clean = clean.replace(/[\x00-\x1F\x7F]/g, ' ');
-      return JSON.parse(clean);
-    }
+    try { return JSON.parse(clean); }
+    catch { clean = clean.replace(/[\x00-\x1F\x7F]/g, ' '); return JSON.parse(clean); }
   }
 
-  // ── Génération principale ──
   async function genererSequence() {
     const niveau     = document.getElementById('niveau').value;
     const nbSeances  = document.getElementById('nb-seances').value;
     const theme      = document.getElementById('theme').value.trim();
     const typeSeance = document.getElementById('type-seance').value;
     const objectifs  = document.getElementById('objectifs').value.trim();
-
     const opts = {
       phases:     document.getElementById('opt-phases').checked,
       notions:    document.getElementById('opt-notions').checked,
@@ -788,172 +700,55 @@ Génère exactement ${nbSeances} séances. Réponds uniquement avec le JSON, rie
       diff:       document.getElementById('opt-diff').checked,
       ressources: document.getElementById('opt-ressources').checked,
     };
-
     const errorBox = document.getElementById('error-box');
     errorBox.style.display = 'none';
-
     if (!niveau || !nbSeances || !theme) {
       errorBox.textContent = 'Merci de remplir le niveau, le nombre de séances et le thème.';
-      errorBox.style.display = 'block';
-      return;
+      errorBox.style.display = 'block'; return;
     }
-
     const btn = document.getElementById('btn-generate');
-    btn.disabled = true;
-    btn.classList.add('loading');
+    btn.disabled = true; btn.classList.add('loading');
     document.getElementById('btn-pdf').disabled = true;
     document.getElementById('result-empty').style.display = 'none';
     document.getElementById('result-content').style.display = 'none';
-
     try {
-      const prompt = construirePrompt(niveau, nbSeances, theme, typeSeance, objectifs, opts);
-      const fiche = await appelAPI(prompt);
-      ficheActuelle = fiche;
-      ficheOpts = opts;
-      modificationsRestantes = 10;
+      const fiche = await appelAPI(construirePrompt(niveau, nbSeances, theme, typeSeance, objectifs, opts));
+      ficheActuelle = fiche; ficheOpts = opts; modificationsRestantes = 10;
       afficherFiche(fiche, opts);
     } catch (err) {
       errorBox.textContent = `Erreur : ${err.message}`;
       errorBox.style.display = 'block';
       document.getElementById('result-empty').style.display = 'flex';
-    } finally {
-      btn.disabled = false;
-      btn.classList.remove('loading');
-    }
+    } finally { btn.disabled = false; btn.classList.remove('loading'); }
   }
 
-  // ── État ──
-  let ficheActuelle = null;
-  let ficheOpts = {};
-  let modificationsRestantes = 10;
+  let ficheActuelle = null, ficheOpts = {}, modificationsRestantes = 10;
 
-  // ── Affichage de la fiche ──
   function afficherFiche(f, opts) {
     const output = document.getElementById('fiche-output');
+    const tagsHTML = [`<span class="fiche-tag">SVT</span>`,`<span class="fiche-tag">${f.niveau}</span>`,`<span class="fiche-tag">${f.nb_seances} séances</span>`].join('');
 
-    // Tags
-    const tagsHTML = [
-      `<span class="fiche-tag">SVT</span>`,
-      `<span class="fiche-tag">${f.niveau}</span>`,
-      `<span class="fiche-tag">${f.nb_seances} séances</span>`,
-    ].join('');
+    const syntheTableRows = f.seances.map(s => `<tr><td class="seance-num" style="width:60px">S${s.num}</td><td><strong>${s.titre}</strong><br><small style="color:#5A7050;font-size:11px">${s.type||''} · ${s.duree}</small></td><td style="font-size:13px;color:#3A4830">${s.objectif}</td><td style="font-size:12.5px;color:#4A5840">${s.resume||''}</td></tr>`).join('');
+    const partieA = `<div class="fiche-section" style="background:#F0F7F0;border:1.5px solid #C0DCC0;border-radius:10px;padding:20px 24px;"><div class="fiche-section-title" style="color:#1A3A1A;font-size:11px">📋 PARTIE A — VUE SYNTHÉTIQUE (aide-mémoire classe)</div><table class="seances-table" style="margin-top:12px"><thead><tr><th>N°</th><th>Titre / Type</th><th>Objectif</th><th>Activités (résumé)</th></tr></thead><tbody>${syntheTableRows}</tbody></table></div>`;
 
-    // Notions
-    let notionsHTML = '';
-    if (f.notions && f.notions.length) {
-      const pills = f.notions.map(n => `<span class="pill">${n}</span>`).join('');
-      notionsHTML = `
-        <div class="fiche-section">
-          <div class="fiche-section-title">Notions clés</div>
-          <div class="fiche-section-content"><div class="pills-wrap">${pills}</div></div>
-        </div>`;
-    }
+    const phaseLabels = { mise_en_situation:'🎯 Mise en situation', hypotheses:'💭 Hypothèses', activite:'🔬 Activité principale', bilan:'✅ Bilan', trace_ecrite:'✏️ Trace écrite' };
 
-    let capacitesHTML = '';
-    if (f.capacites && f.capacites.length) {
-      const pills = f.capacites.map(c => `<span class="pill cap">${c}</span>`).join('');
-      capacitesHTML = `
-        <div class="fiche-section">
-          <div class="fiche-section-title">Capacités / habiletés du programme</div>
-          <div class="fiche-section-content"><div class="pills-wrap">${pills}</div></div>
-        </div>`;
-    }
-
-    // Séances
-    const seancesHTML = f.seances.map(s => {
-      let phasesHTML = '';
-      if (opts.phases && s.phases) {
-        const labels = {
-          mise_en_situation: 'Mise en situation',
-          hypotheses:        'Hypothèses / représentations',
-          activite:          'Activité principale',
-          bilan:             'Bilan / institutionnalisation',
-          trace_ecrite:      'Trace écrite',
-        };
-        phasesHTML = '<div class="phases-list">' +
-          Object.entries(labels).map(([key, label]) =>
-            s.phases[key] ? `<div class="phase-item"><span class="phase-label">${label}</span><span class="phase-content">${s.phases[key]}</span></div>` : ''
-          ).join('') +
-          '</div>';
-      } else {
-        phasesHTML = `<span>${s.activite || ''}</span>`;
-      }
-
-      return `
-        <tr>
-          <td class="seance-num">Séance ${s.num}</td>
-          <td><strong>${s.titre}</strong><br><small style="color:#5A7050">${s.type || ''}</small></td>
-          <td style="white-space:nowrap">${s.duree}</td>
-          <td>${s.objectif}</td>
-          <td>${phasesHTML}</td>
-        </tr>`;
+    const seancesDetailHTML = f.seances.map(s => {
+      const phasesHTML = s.phases ? Object.entries(phaseLabels).map(([key, label]) =>
+        s.phases[key] ? `<div class="phase-item" style="${key==='trace_ecrite'?'border-left-color:#4A9A4A;background:#F4FCF4':''}"><span class="phase-label">${label}</span><span class="phase-content">${s.phases[key]}</span></div>` : ''
+      ).join('') : '';
+      const diffHTML = s.differenciation ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px"><div style="background:#FFF8F0;border:1px solid #F0D0A0;border-radius:7px;padding:10px 14px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#8A5A10;margin-bottom:5px">🟡 Élèves en difficulté</div><div style="font-size:13px;color:#3A2810;line-height:1.5">${s.differenciation.difficulte||''}</div></div><div style="background:#F0F4FF;border:1px solid #A0B8F0;border-radius:7px;padding:10px 14px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#1A3A8A;margin-bottom:5px">🔵 Élèves avancés</div><div style="font-size:13px;color:#10203A;line-height:1.5">${s.differenciation.avance||''}</div></div></div>` : '';
+      const outilHTML = s.outil_numerique && s.outil_numerique !== 'null' && s.outil_numerique.nom ? `<div style="background:#F4F0FF;border:1px solid #C0A8F0;border-radius:7px;padding:10px 14px;margin-top:10px"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#5A1A8A">💻 ${s.outil_numerique.nom}</span><span style="font-size:12.5px;color:#2A103A;margin-left:8px">${s.outil_numerique.moment} — ${s.outil_numerique.usage}</span></div>` : '';
+      return `<div style="border:1px solid #D8E8D0;border-radius:10px;overflow:hidden;margin-bottom:16px"><div style="background:#1A3A1A;color:white;padding:12px 20px;display:flex;align-items:center;gap:12px"><span style="background:#4A9A4A;color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">${s.num}</span><div><div style="font-weight:700;font-size:15px">${s.titre}</div><div style="font-size:11.5px;color:rgba(255,255,255,0.6)">${s.type||''} · ${s.duree} · ${s.objectif}</div></div></div><div style="padding:16px 20px"><div class="phases-list">${phasesHTML}</div>${diffHTML}${outilHTML}</div></div>`;
     }).join('');
 
-    // Sections optionnelles
+    const notionsHTML = f.notions&&f.notions.length ? `<div class="fiche-section"><div class="fiche-section-title">Notions clés</div><div class="fiche-section-content"><div class="pills-wrap">${f.notions.map(n=>`<span class="pill">${n}</span>`).join('')}</div></div></div>` : '';
+    const capacitesHTML = f.capacites&&f.capacites.length ? `<div class="fiche-section"><div class="fiche-section-title">Capacités / habiletés du programme</div><div class="fiche-section-content"><div class="pills-wrap">${f.capacites.map(c=>`<span class="pill cap">${c}</span>`).join('')}</div></div></div>` : '';
     const sectionsOpt = [];
+    if (f.evaluation && f.evaluation!=='null') sectionsOpt.push(`<div class="fiche-section"><div class="fiche-section-title">Évaluation finale</div><div class="fiche-section-content"><p>${f.evaluation}</p></div></div>`);
+    if (f.ressources_materielles && f.ressources_materielles!=='null') sectionsOpt.push(`<div class="fiche-section"><div class="fiche-section-title">Ressources & matériel</div><div class="fiche-section-content"><p>${f.ressources_materielles}</p></div></div>`);
 
-    if (f.evaluation && f.evaluation !== 'null') {
-      sectionsOpt.push(`
-        <div class="fiche-section">
-          <div class="fiche-section-title">Évaluation finale</div>
-          <div class="fiche-section-content"><p>${f.evaluation}</p></div>
-        </div>`);
-    }
-
-    if (f.differenciation && f.differenciation !== 'null') {
-      sectionsOpt.push(`
-        <div class="fiche-section">
-          <div class="fiche-section-title">Différenciation pédagogique</div>
-          <div class="fiche-section-content"><p>${f.differenciation}</p></div>
-        </div>`);
-    }
-
-    if (f.ressources && f.ressources !== 'null') {
-      sectionsOpt.push(`
-        <div class="fiche-section">
-          <div class="fiche-section-title">Ressources & matériel</div>
-          <div class="fiche-section-content"><p>${f.ressources}</p></div>
-        </div>`);
-    }
-
-    output.innerHTML = `
-      <div class="fiche-header">
-        <div class="fiche-meta">${tagsHTML}</div>
-        <h1>${f.titre}</h1>
-        <div class="subtitle">${f.sous_titre}</div>
-      </div>
-      <div class="fiche-body">
-        <div class="fiche-section">
-          <div class="fiche-section-title">Ancrage programme officiel</div>
-          <div class="fiche-section-content"><p>${f.programme}</p></div>
-        </div>
-        <div class="fiche-section">
-          <div class="fiche-section-title">Problématique</div>
-          <div class="fiche-section-content"><p><strong>${f.problematique}</strong></p></div>
-        </div>
-        ${notionsHTML}
-        ${capacitesHTML}
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
-          <div class="fiche-section">
-            <div class="fiche-section-title">Prérequis</div>
-            <div class="fiche-section-content">
-              <ul>${(f.prerequis || []).map(p => `<li>${p}</li>`).join('')}</ul>
-            </div>
-          </div>
-        </div>
-        <div class="fiche-section">
-          <div class="fiche-section-title">Déroulé des séances</div>
-          <div class="fiche-section-content">
-            <table class="seances-table">
-              <thead>
-                <tr><th>N°</th><th>Titre / Type</th><th>Durée</th><th>Objectif</th><th>Déroulé</th></tr>
-              </thead>
-              <tbody>${seancesHTML}</tbody>
-            </table>
-          </div>
-        </div>
-        ${sectionsOpt.join('')}
-      </div>`;
+    output.innerHTML = `<div class="fiche-header"><div class="fiche-meta">${tagsHTML}</div><h1>${f.titre}</h1><div class="subtitle">${f.sous_titre}</div></div><div class="fiche-body"><div class="fiche-section"><div class="fiche-section-title">Ancrage programme officiel</div><div class="fiche-section-content"><p>${f.programme}</p></div></div><div class="fiche-section"><div class="fiche-section-title">Problématique</div><div class="fiche-section-content"><p><strong>${f.problematique}</strong></p></div></div>${notionsHTML}${capacitesHTML}<div class="fiche-section"><div class="fiche-section-title">Prérequis</div><div class="fiche-section-content"><ul>${(f.prerequis||[]).map(p=>`<li>${p}</li>`).join('')}</ul></div></div>${partieA}<div class="fiche-section" style="margin-top:8px"><div class="fiche-section-title">📖 PARTIE B — VUE DÉTAILLÉE séance par séance</div><div style="margin-top:14px">${seancesDetailHTML}</div></div>${sectionsOpt.join('')}</div>`;
 
     document.getElementById('result-content').style.display = 'block';
     document.getElementById('toolbar-title').textContent = `SVT · ${f.niveau} · ${f.titre}`;
@@ -961,71 +756,43 @@ Génère exactement ${nbSeances} séances. Réponds uniquement avec le JSON, rie
     afficherZoneModif();
   }
 
-  // ── Zone de modification ──
   function afficherZoneModif() {
-    const zone       = document.getElementById('modif-zone');
-    const counter    = document.getElementById('modif-counter');
-    const input      = document.getElementById('modif-input');
-    const btn        = document.getElementById('btn-modif');
-    const exhausted  = document.getElementById('modif-exhausted-msg');
-
+    const zone=document.getElementById('modif-zone'), counter=document.getElementById('modif-counter'),
+          input=document.getElementById('modif-input'), btn=document.getElementById('btn-modif'),
+          exhausted=document.getElementById('modif-exhausted-msg');
     zone.classList.add('visible');
-
     if (modificationsRestantes <= 0) {
-      input.style.display = 'none';
-      btn.style.display = 'none';
-      document.querySelector('.modif-hint').style.display = 'none';
-      exhausted.style.display = 'block';
-      counter.textContent = '0 modification restante';
-      counter.className = 'modif-counter exhausted';
+      input.style.display='none'; btn.style.display='none';
+      document.querySelector('.modif-hint').style.display='none';
+      exhausted.style.display='block'; counter.textContent='0 modification restante';
+      counter.className='modif-counter exhausted';
     } else {
-      input.style.display = 'block';
-      btn.style.display = 'flex';
-      document.querySelector('.modif-hint').style.display = 'block';
-      exhausted.style.display = 'none';
-      counter.textContent = `${modificationsRestantes} modification${modificationsRestantes > 1 ? 's' : ''} restante${modificationsRestantes > 1 ? 's' : ''}`;
-      counter.className = 'modif-counter' + (modificationsRestantes <= 3 ? ' warning' : '');
+      input.style.display='block'; btn.style.display='flex';
+      document.querySelector('.modif-hint').style.display='block';
+      exhausted.style.display='none';
+      counter.textContent=`${modificationsRestantes} modification${modificationsRestantes>1?'s':''} restante${modificationsRestantes>1?'s':''}`;
+      counter.className='modif-counter'+(modificationsRestantes<=3?' warning':'');
     }
   }
 
   async function modifierSequence() {
     const demande = document.getElementById('modif-input').value.trim();
     if (!demande || modificationsRestantes <= 0) return;
-
     const errorBox = document.getElementById('error-box');
     errorBox.style.display = 'none';
-
     const btn = document.getElementById('btn-modif');
-    btn.disabled = true;
-    btn.classList.add('loading');
-
-    const prompt = `Tu es un(e) professeur(e) expert(e) en SVT pour le secondaire français.
-
-Voici une séquence pédagogique SVT déjà générée au format JSON :
-${JSON.stringify(ficheActuelle)}
-
-Demande de modification : ${demande}
-
-RÈGLES CRITIQUES :
-- Applique uniquement la modification demandée, conserve le reste à l'identique
-- Réponds UNIQUEMENT avec le JSON complet modifié, zéro texte avant ou après
-- INTERDIT : retours à la ligne littéraux dans les valeurs string
-- Respecte exactement la même structure JSON que l'original`;
-
+    btn.disabled = true; btn.classList.add('loading');
+    const prompt = `Tu es un(e) professeur(e) expert(e) en SVT pour le secondaire français.\n\nVoici une séquence pédagogique SVT déjà générée au format JSON :\n${JSON.stringify(ficheActuelle)}\n\nDemande de modification : ${demande}\n\nRÈGLES CRITIQUES :\n- Applique uniquement la modification demandée, conserve le reste à l'identique\n- Réponds UNIQUEMENT avec le JSON complet modifié, zéro texte avant ou après\n- INTERDIT : retours à la ligne littéraux dans les valeurs string\n- Respecte exactement la même structure JSON que l'original`;
     try {
       const fiche = await appelAPI(prompt);
-      ficheActuelle = fiche;
-      modificationsRestantes--;
+      ficheActuelle = fiche; modificationsRestantes--;
       afficherFiche(fiche, ficheOpts);
       document.getElementById('modif-input').value = '';
       afficherZoneModif();
     } catch (err) {
       errorBox.textContent = `Erreur : ${err.message}`;
       errorBox.style.display = 'block';
-    } finally {
-      btn.disabled = false;
-      btn.classList.remove('loading');
-    }
+    } finally { btn.disabled = false; btn.classList.remove('loading'); }
   }
 
   function telechargerPDF() { window.print(); }

@@ -1,12 +1,11 @@
-// À placer dans : api/generate.js (à la racine du projet)
-// Fonction serverless Vercel — appelle l'API Anthropic (Claude)
+// api/generate.js — Fonction serverless Vercel
+// Appelle l'API Anthropic (Claude)
 // Clé API sur : https://console.anthropic.com
 
 import Anthropic from "@anthropic-ai/sdk";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
-  // Clé à définir dans Vercel : Settings > Environment Variables > ANTHROPIC_API_KEY
 });
 
 export default async function handler(req, res) {
@@ -26,9 +25,7 @@ export default async function handler(req, res) {
       max_tokens,
       messages,
     });
-
     return res.status(200).json(response);
-
   } catch (err) {
     console.error("Erreur API Anthropic :", err);
     return res.status(500).json({ error: err.message || "Erreur serveur" });
