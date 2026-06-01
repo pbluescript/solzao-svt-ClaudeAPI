@@ -100,6 +100,7 @@
     .btn-modif.loading .spinner { display: block; }
     .btn-modif.loading .btn-text { display: none; }
     .modif-hint { font-size: 12px; color: #8A9E80; line-height: 1.5; }
+    .modif-error { background: #FFF5F5; border: 1px solid #FECACA; border-radius: 8px; padding: 12px 16px; color: #991B1B; font-size: 13px; line-height: 1.5; margin-top: 10px; display: none; word-break: break-all; }
     .modif-exhausted-msg { text-align: center; padding: 16px; font-size: 13px; color: #5A7050; line-height: 1.6; display: none; }
     .modif-exhausted-msg strong { color: #111; }
     .error-box { background: #FFF5F5; border: 1px solid #FECACA; border-radius: 8px; padding: 14px 18px; color: #991B1B; font-size: 13.5px; line-height: 1.55; display: none; }
@@ -172,12 +173,12 @@
       </div>
       <div class="field-group">
         <label class="field-label" for="theme">Thème ou titre de la séquence <span class="field-required">*</span></label>
-        <input type="text" id="theme" placeholder="ex. La cellule, L'évolution, La digestion, La tectonique…">
+        <input type="text" id="theme" placeholder="ex. La cellule, L'évolution, La digestion…">
         <div id="suggestions-themes" style="display:none; margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;"></div>
       </div>
       <div class="field-group">
         <label class="field-label" for="objectifs">Précisions (optionnel)</label>
-        <textarea id="objectifs" placeholder="ex. Classe de 5ème très hétérogène, insister sur la démarche hypothético-déductive…"></textarea>
+        <textarea id="objectifs" placeholder="ex. Classe de 5ème très hétérogène…"></textarea>
       </div>
       <div class="field-group">
         <label class="field-label">Options</label>
@@ -207,7 +208,7 @@
     <div class="result-empty" id="result-empty">
       <div class="empty-icon">🧬</div>
       <h3>Votre séquence SVT apparaîtra ici</h3>
-      <p>Remplissez le formulaire et cliquez sur "Générer la séquence SVT" pour obtenir une fiche structurée calée sur le programme officiel.</p>
+      <p>Remplissez le formulaire et cliquez sur "Générer la séquence SVT".</p>
     </div>
     <div id="result-content">
       <div class="fiche" id="fiche-output"></div>
@@ -216,7 +217,7 @@
           <span class="modif-title">✏️ Modifier cette séquence</span>
           <span class="modif-counter" id="modif-counter">10 modifications restantes</span>
         </div>
-        <textarea class="modif-input" id="modif-input" placeholder="ex. Rends la séance 2 plus axée TP · Ajoute une séance d'introduction · Simplifie pour une classe de SEGPA…"></textarea>
+        <textarea class="modif-input" id="modif-input" placeholder="ex. Ajoute un TP Ouchterlony en séance 2 · Rends la séance 3 plus collaborative · Simplifie pour SEGPA…"></textarea>
         <div class="modif-actions">
           <button class="btn-modif" id="btn-modif" onclick="modifierSequence()">
             <div class="spinner"></div>
@@ -224,6 +225,7 @@
           </button>
           <span class="modif-hint">La séquence sera mise à jour directement</span>
         </div>
+        <div class="modif-error" id="modif-error"></div>
         <div class="modif-exhausted-msg" id="modif-exhausted-msg">
           <strong>Limite atteinte.</strong> Générez une nouvelle séquence pour repartir de zéro.
         </div>
@@ -281,72 +283,29 @@
       'TP':      'séances majoritairement expérimentales (TP, dissections, microscope)',
       'cours':   'séances de cours enrichis de questionnements et schémas bilan',
       'terrain': 'séances orientées observation terrain, sortie naturaliste',
-      'doc':     "séances d'exploitation de documents scientifiques et données",
+      'doc':     "séances d'exploitation de documents scientifiques",
     }[typeSeance] || 'séances mixtes';
 
-    const outilSchema = opts.ressources
-      ? '{"nom": "NOM_EXACT_OUTIL", "moment": "PHASE_ET_MOMENT", "usage": "USAGE_PRECIS"}'
-      : 'null';
+    const outilSchema = opts.ressources ? '{"nom": "NOM_EXACT", "moment": "PHASE_MOMENT", "usage": "USAGE_PRECIS"}' : 'null';
+    const evalSchema = opts.eval ? '"type QCM/schema/redaction + competences evaluees + format"' : 'null';
+    const ressourcesSchema = opts.ressources ? '"materiel ou ressources documentaires necessaires"' : 'null';
 
-    const evalSchema = opts.eval
-      ? '"description précise : type QCM/schéma/rédaction, compétences évaluées, format"'
-      : 'null';
-
-    const ressourcesSchema = opts.ressources
-      ? '"matériel ou ressources documentaires nécessaires"'
-      : 'null';
-
-    return 'Tu es un professeur expert en SVT pour le secondaire français, parfaitement au fait des programmes Eduscol et du CAPES SVT.\n\n'
+    return 'Tu es un professeur expert en SVT pour le secondaire francais, au fait des programmes Eduscol et du CAPES SVT.\n\n'
       + 'PARAMETRES:\n'
       + '- Niveau : ' + niveau + '\n'
       + '- Theme : ' + theme + '\n'
       + '- Nombre de seances : ' + nbSeances + '\n'
       + '- Type dominant : ' + typeDesc + '\n'
       + (objectifs ? '- Precisions : ' + objectifs + '\n' : '')
-      + '\nREGLES CRITIQUES:\n'
-      + '- Reponds UNIQUEMENT avec du JSON valide, zero texte avant ou apres\n'
-      + '- INTERDIT : retours a la ligne dans les valeurs string\n'
-      + '- La problematique = vraie question scientifique ouverte\n'
-      + '- Differenciation : CONCRETE et rattachee a activite precise de la seance (pas de generalites)\n'
-      + '- Outil numerique : NOM EXACT (Wooclap, Padlet, Kahoot, Genially, Quizlet...) + phase precise + usage precis\n'
-      + '- Trace ecrite : type PRECIS (schema annote / tableau / texte) + contenu + volume indicatif\n'
-      + '\nSTRUCTURE JSON ATTENDUE:\n'
-      + '{\n'
-      + '  "niveau": "' + niveau + '",\n'
-      + '  "nb_seances": ' + nbSeances + ',\n'
-      + '  "titre": "titre de la sequence",\n'
-      + '  "sous_titre": "sous-titre court",\n'
-      + '  "programme": "reference programme officiel SVT BO",\n'
-      + '  "problematique": "Question scientifique centrale ?",\n'
-      + '  "notions": ["notion1", "notion2", "notion3"],\n'
-      + '  "capacites": ["capacite1", "capacite2"],\n'
-      + '  "prerequis": ["prerequis1", "prerequis2"],\n'
-      + '  "seances": [\n'
-      + '    {\n'
-      + '      "num": 1,\n'
-      + '      "titre": "titre seance",\n'
-      + '      "duree": "1h",\n'
-      + '      "type": "Cours dialogue / TP / Exploitation documents / Evaluation",\n'
-      + '      "objectif": "objectif operationnel : l eleve sera capable de...",\n'
-      + '      "resume": "resume activites 2-3 lignes",\n'
-      + '      "phases": {\n'
-      + '        "mise_en_situation": "document declencheur precis",\n'
-      + '        "hypotheses": "modalite concrete recueil hypotheses",\n'
-      + '        "activite": "description precise avec materiel utilise",\n'
-      + '        "bilan": "modalite institutionnalisation",\n'
-      + '        "trace_ecrite": "type + contenu + volume PRECIS"\n'
-      + '      },\n'
-      + '      "differenciation": {\n'
-      + '        "difficulte": "adaptation concrete reliee a cette seance",\n'
-      + '        "avance": "approfondissement concret relie a cette seance"\n'
-      + '      },\n'
-      + '      "outil_numerique": ' + outilSchema + '\n'
-      + '    }\n'
-      + '  ],\n'
-      + '  "evaluation": ' + evalSchema + ',\n'
-      + '  "ressources_materielles": ' + ressourcesSchema + '\n'
-      + '}\n\n'
-      + 'Genere exactement ' + nbSeances + ' seances. JSON uniquement, rien d autre.';
+      + '\nREGLES ABSOLUES:\n'
+      + '1. JSON VALIDE UNIQUEMENT - zero texte avant ou apres\n'
+      + '2. PAS de retours a la ligne dans les valeurs string\n'
+      + '3. Problematique = vraie question scientifique\n'
+      + '4. Differenciation CONCRETE liee a la seance (pas de generalites)\n'
+      + '5. Outil numerique : NOM EXACT (Wooclap/Padlet/Kahoot/Genially/Quizlet) + phase + usage\n'
+      + '6. Trace ecrite : type PRECIS + contenu + volume\n'
+      + '\nJSON A PRODUIRE (genere exactement ' + nbSeances + ' seances) :\n'
+      + '{"niveau":"' + niveau + '","nb_seances":' + nbSeances + ',"titre":"...","sous_titre":"...","programme":"...","problematique":"...","notions":["..."],"capacites":["..."],"prerequis":["..."],"seances":[{"num":1,"titre":"...","duree":"1h","type":"...","objectif":"...","resume":"...","phases":{"mise_en_situation":"...","hypotheses":"...","activite":"...","bilan":"...","trace_ecrite":"..."},"differenciation":{"difficulte":"...","avance":"..."},"outil_numerique":' + outilSchema + '}],"evaluation":' + evalSchema + ',"ressources_materielles":' + ressourcesSchema + '}';
   }
 
   async function appelAPI(prompt) {
@@ -363,10 +322,14 @@
     const rawText = data.content.map(b => b.text || '').join('');
     let clean = rawText.replace(/```json|```/g, '').trim();
     const jsonMatch = clean.match(/{[\s\S]*}/);
-    if (!jsonMatch) throw new Error('Reponse inattendue — aucun JSON trouve. Reessayez.');
+    if (!jsonMatch) throw new Error('Aucun JSON dans la reponse. Reessayez.');
     clean = repairJSON(jsonMatch[0]);
     try { return JSON.parse(clean); }
-    catch { clean = clean.replace(/[\x00-\x1F\x7F]/g, ' '); return JSON.parse(clean); }
+    catch (e) {
+      clean = clean.replace(/[\x00-\x1F\x7F]/g, ' ');
+      try { return JSON.parse(clean); }
+      catch (e2) { throw new Error('JSON invalide : ' + e2.message.substring(0, 100)); }
+    }
   }
 
   async function genererSequence() {
@@ -418,8 +381,8 @@
     ).join('');
 
     const partieA = '<div class="fiche-section" style="background:#F0F7F0;border:1.5px solid #C0DCC0;border-radius:10px;padding:20px 24px;">'
-      + '<div class="fiche-section-title" style="color:#1A3A1A;font-size:11px">📋 PARTIE A — VUE SYNTHÉTIQUE (aide-mémoire classe)</div>'
-      + '<table class="seances-table" style="margin-top:12px"><thead><tr><th>N°</th><th>Titre / Type</th><th>Objectif</th><th>Activités (résumé)</th></tr></thead>'
+      + '<div class="fiche-section-title" style="color:#1A3A1A;font-size:11px">📋 PARTIE A — VUE SYNTHÉTIQUE</div>'
+      + '<table class="seances-table" style="margin-top:12px"><thead><tr><th>N°</th><th>Titre / Type</th><th>Objectif</th><th>Activités</th></tr></thead>'
       + '<tbody>' + syntheTableRows + '</tbody></table></div>';
 
     const phaseLabels = { mise_en_situation:'🎯 Mise en situation', hypotheses:'💭 Hypothèses', activite:'🔬 Activité principale', bilan:'✅ Bilan', trace_ecrite:'✏️ Trace écrite' };
@@ -444,7 +407,7 @@
 
       const outilHTML = s.outil_numerique && typeof s.outil_numerique === 'object' && s.outil_numerique.nom
         ? '<div style="background:#F4F0FF;border:1px solid #C0A8F0;border-radius:7px;padding:10px 14px;margin-top:10px">'
-          + '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#5A1A8A">💻 ' + s.outil_numerique.nom + '</span>'
+          + '<span style="font-size:10px;font-weight:700;text-transform:uppercase;color:#5A1A8A">💻 ' + s.outil_numerique.nom + '</span>'
           + '<span style="font-size:12.5px;color:#2A103A;margin-left:8px">' + (s.outil_numerique.moment||'') + ' — ' + (s.outil_numerique.usage||'') + '</span></div>'
         : '';
 
@@ -457,11 +420,9 @@
     }).join('');
 
     const notionsHTML = f.notions && f.notions.length
-      ? '<div class="fiche-section"><div class="fiche-section-title">Notions clés</div><div class="fiche-section-content"><div class="pills-wrap">' + f.notions.map(n => '<span class="pill">' + n + '</span>').join('') + '</div></div></div>'
-      : '';
+      ? '<div class="fiche-section"><div class="fiche-section-title">Notions clés</div><div class="fiche-section-content"><div class="pills-wrap">' + f.notions.map(n => '<span class="pill">' + n + '</span>').join('') + '</div></div></div>' : '';
     const capacitesHTML = f.capacites && f.capacites.length
-      ? '<div class="fiche-section"><div class="fiche-section-title">Capacités / habiletés du programme</div><div class="fiche-section-content"><div class="pills-wrap">' + f.capacites.map(c => '<span class="pill cap">' + c + '</span>').join('') + '</div></div></div>'
-      : '';
+      ? '<div class="fiche-section"><div class="fiche-section-title">Capacités du programme</div><div class="fiche-section-content"><div class="pills-wrap">' + f.capacites.map(c => '<span class="pill cap">' + c + '</span>').join('') + '</div></div></div>' : '';
     const sectionsOpt = [];
     if (f.evaluation && f.evaluation !== 'null') sectionsOpt.push('<div class="fiche-section"><div class="fiche-section-title">Évaluation finale</div><div class="fiche-section-content"><p>' + f.evaluation + '</p></div></div>');
     if (f.ressources_materielles && f.ressources_materielles !== 'null') sectionsOpt.push('<div class="fiche-section"><div class="fiche-section-title">Ressources & matériel</div><div class="fiche-section-content"><p>' + f.ressources_materielles + '</p></div></div>');
@@ -473,7 +434,7 @@
       + notionsHTML + capacitesHTML
       + '<div class="fiche-section"><div class="fiche-section-title">Prérequis</div><div class="fiche-section-content"><ul>' + (f.prerequis||[]).map(p => '<li>' + p + '</li>').join('') + '</ul></div></div>'
       + partieA
-      + '<div class="fiche-section" style="margin-top:8px"><div class="fiche-section-title">📖 PARTIE B — VUE DÉTAILLÉE séance par séance</div><div style="margin-top:14px">' + seancesDetailHTML + '</div></div>'
+      + '<div class="fiche-section" style="margin-top:8px"><div class="fiche-section-title">📖 PARTIE B — VUE DÉTAILLÉE</div><div style="margin-top:14px">' + seancesDetailHTML + '</div></div>'
       + sectionsOpt.join('')
       + '</div>';
 
@@ -489,7 +450,9 @@
     const input = document.getElementById('modif-input');
     const btn = document.getElementById('btn-modif');
     const exhausted = document.getElementById('modif-exhausted-msg');
+    const modifError = document.getElementById('modif-error');
     zone.classList.add('visible');
+    modifError.style.display = 'none';
     if (modificationsRestantes <= 0) {
       input.style.display = 'none'; btn.style.display = 'none';
       document.querySelector('.modif-hint').style.display = 'none';
@@ -508,23 +471,30 @@
   async function modifierSequence() {
     const demande = document.getElementById('modif-input').value.trim();
     if (!demande || modificationsRestantes <= 0) return;
-    const errorBox = document.getElementById('error-box');
-    errorBox.style.display = 'none';
+    const modifError = document.getElementById('modif-error');
+    modifError.style.display = 'none';
     const btn = document.getElementById('btn-modif');
     btn.disabled = true; btn.classList.add('loading');
-    const prompt = 'Tu es un professeur expert en SVT pour le secondaire français.\n\n'
-      + 'Voici une séquence pédagogique SVT au format JSON :\n' + JSON.stringify(ficheActuelle) + '\n\n'
-      + 'Demande de modification : ' + demande + '\n\n'
-      + 'REGLES : Applique uniquement la modification, conserve le reste. JSON complet uniquement, zéro texte avant/après. Meme structure JSON.';
+
+    // On envoie la fiche actuelle compacte pour eviter de depasser les tokens
+    const ficheCompacte = JSON.stringify(ficheActuelle);
+
+    const prompt = 'Tu es un professeur expert en SVT.\n\n'
+      + 'Voici la sequence JSON actuelle :\n' + ficheCompacte + '\n\n'
+      + 'Modification demandee : ' + demande + '\n\n'
+      + 'Reponds UNIQUEMENT avec le JSON complet modifie. Meme structure. Pas de texte avant ou apres. Pas de retours a la ligne dans les strings.';
+
     try {
       const fiche = await appelAPI(prompt);
-      ficheActuelle = fiche; modificationsRestantes--;
+      ficheActuelle = fiche;
+      modificationsRestantes--;
       afficherFiche(fiche, ficheOpts);
       document.getElementById('modif-input').value = '';
-      afficherZoneModif();
+      // Scroll vers le haut de la fiche
+      document.getElementById('fiche-output').scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (err) {
-      errorBox.textContent = 'Erreur : ' + err.message;
-      errorBox.style.display = 'block';
+      modifError.textContent = 'Erreur : ' + err.message;
+      modifError.style.display = 'block';
     } finally { btn.disabled = false; btn.classList.remove('loading'); }
   }
 
